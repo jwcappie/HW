@@ -1,0 +1,14 @@
+fun cube x
+let
+push x
+push x
+mul
+push x
+mul
+end
+return
+funEnd
+push cube
+push 5
+call
+quit

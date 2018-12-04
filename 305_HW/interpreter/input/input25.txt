@@ -1,0 +1,24 @@
+fun stop arg
+push 1
+return
+funEnd
+fun addton arg
+push arg
+push 1
+sub
+push 1
+push arg
+equal
+push stop
+push addton
+if
+swap
+call
+push arg
+mul
+return
+funEnd
+push addton
+push 8
+call
+quit

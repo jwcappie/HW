@@ -1,0 +1,26 @@
+inOutFun inputtest9 x
+push x
+push 9
+bind
+funEnd
+pop
+let
+push A
+push 1
+bind
+let
+push A
+push 4
+bind
+push inputtest9
+push A
+call
+push A
+push A
+mul
+end
+push A
+push A
+mul
+end
+quit

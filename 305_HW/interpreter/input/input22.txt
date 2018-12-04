@@ -1,0 +1,17 @@
+push test22
+push "test case _22"
+bind
+fun identity x
+push x
+return
+funEnd
+push identity
+push test22
+call
+push c
+push test22
+bind
+push identity
+push c
+call
+quit

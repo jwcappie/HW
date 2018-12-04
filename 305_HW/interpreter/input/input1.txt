@@ -1,0 +1,22 @@
+fun test1 _X
+push _X
+push 12
+add
+return
+funEnd
+fun test2 _A
+push C
+push 3
+bind
+push C
+push _A
+mul
+return
+funEnd
+push test1
+push 4
+call
+push test2
+push 9
+call
+quit

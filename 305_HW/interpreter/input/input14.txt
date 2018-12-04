@@ -1,0 +1,26 @@
+push y
+push 4
+bind
+inOutFun subY x
+push x
+push y
+sub
+push x
+bind
+funEnd
+fun mulY arg
+push y
+push arg
+mul
+return
+funEnd
+push a
+push 3
+bind
+push subY
+push a
+call
+push mulY
+push a
+call
+quit

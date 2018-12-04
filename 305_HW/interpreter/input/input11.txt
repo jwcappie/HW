@@ -1,0 +1,14 @@
+push _K
+push 8
+bind
+push _K
+push 9
+add
+fun id x
+push x
+return
+funEnd
+push id
+push 1
+call
+quit
