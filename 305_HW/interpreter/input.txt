@@ -1,0 +1,4 @@
+push 7
+push 8
+lessThan
+quit

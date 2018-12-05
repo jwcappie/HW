@@ -1,0 +1,17 @@
+push para
+push 3
+bind
+pop
+inOutFun equal2 _X
+push _X
+push 2
+bind
+funEnd
+pop
+push equal2
+push para
+call
+push para
+push para
+mul
+quit
