@@ -87,6 +87,40 @@ class NameStackElement extends StackElement<String>implements Evaluable{
 		}
 	}
 }
+
+class FunStackElement extends StackElement<ArrayList<Command>>implements Evaluable{
+	String arg;
+	Stack<Command> body;
+	public FunStackElement(StackElement arg){
+		this.arg=arg.toString();
+		body = new Stack<Command>();
+	}
+	public String toString(){
+		return arg.toString();
+	}
+	public void addCom (Command com) {
+		
+		body.push(com);
+	}
+	public StackElement eval(Configuration c) throws Exception{
+		if(!c.envs.empty()){
+			c.envs.peek().put(arg, c.stks.peek().pop());
+			Command com = body.pop();
+			while(!(com instanceof Return))
+			{
+				c = com.exec(c);
+				
+				com = body.pop();
+				
+			}
+			return c.stks.peek().pop();
+		}
+		else{
+			throw new Exception("Empty stack of environments! This should not happen");
+		}
+	}
+}
+
 class ErrorStackElement extends StackElement<String>{
 	public String toString(){
 		return (new String(":"+"error"+":"));
@@ -491,6 +525,131 @@ class If implements Command{
 		}
 	}	
 }
+class Fun implements Command{
+	StackElement name;
+	StackElement arg;
+	public Fun(StackElement name, StackElement arg) {
+		this.name = name;
+		this.arg = arg;
+	}
+
+	public Configuration exec(Configuration conf) throws Exception{
+		if(!conf.stks.isEmpty()&&!conf.envs.isEmpty()){
+			
+			
+			if ((name instanceof NameStackElement) && (arg instanceof NameStackElement)) {
+				
+				FunStackElement fun = new FunStackElement(arg);
+				Command temp = conf.program.iterator().next();
+				while(!(temp instanceof FunEnd)) {
+					fun.addCom(temp);
+					temp = conf.program.iterator().next();
+				}
+				conf.stks.peek().push(name);
+				conf.stks.peek().push(fun);
+				
+				conf = new Bind().exec(conf);
+				
+			}
+			
+			
+			
+			
+	
+		}
+		else{
+			throw new Exception("Empty stack of stacks or Stack of envs! This should not happen");
+		}
+		return conf;
+	}
+	
+}
+
+class FunEnd implements Command{
+	public Configuration exec(Configuration conf) throws Exception{
+//		if(!conf.stks.isEmpty()&&!conf.envs.isEmpty()){
+//			
+//		}
+//		else{
+//			throw new Exception("Empty stack of stacks or Stack of envs! This should not happen");
+//		}
+		return conf;
+	}
+	
+}
+class Return implements Command{
+	public Configuration exec(Configuration c) throws Exception{
+		return c;
+		
+	}
+	
+	}
+
+
+ class Call implements Command {
+	
+	public Configuration exec(Configuration conf) throws Exception {
+		if(!conf.stks.isEmpty()&&!conf.envs.isEmpty()){
+			if(conf.stks.peek().size()>=2){
+				StackElement arg = conf.stks.peek().pop();
+				StackElement fun = conf.stks.peek().pop();
+				if (fun instanceof NameStackElement && arg instanceof Evaluable){
+						try{
+				
+							Evaluable name=(Evaluable)fun;
+							StackElement val2;
+							try{
+								val2=name.eval(conf);
+								if(val2 instanceof FunStackElement)
+								{
+									FunStackElement f = (FunStackElement)val2;
+									conf.stks.push(new Stack<StackElement>());
+									conf.envs.push(new HashMap<String, StackElement>());
+									conf.stks.peek().push(arg);
+									StackElement retVal = f.eval(conf);
+									conf.stks.pop();
+									conf.envs.pop();
+									conf.stks.peek().push(retVal);
+									
+									
+								}
+							
+							}
+							catch(AException e){
+								conf.stks.peek().push(new ErrorStackElement());
+								return conf;								
+							}
+								
+						}					
+						catch(AException c){
+//							conf.stks.peek().push(stel2);
+//							conf.stks.peek().push(stel1);
+							conf.stks.peek().push(new ErrorStackElement());														
+						}
+						
+				}
+				else{
+//					conf.stks.peek().push(stel2);
+//					conf.stks.peek().push(stel1);
+					conf.stks.peek().push(new ErrorStackElement());
+				}
+			}
+			else{
+				conf.stks.peek().push(new ErrorStackElement());
+			}
+		}
+		else{
+			throw new Exception("Empty stack of stacks or Stack of envs! This should not happen");
+		}
+		return conf;
+	}
+}
+		
+
+
+
+
+
 class Configuration{
 	Stack<Stack<StackElement>> stks;
 	Stack<HashMap<String,StackElement>> envs;
@@ -529,7 +688,7 @@ class UtilityCommand{
 			return new ErrorStackElement(); 
 		}
 		public Command stringToCommand(String str)throws Exception{
-			String spl[] = str.split(" ", 2);
+			String spl[] = str.split(" ", 3);
 			switch(spl[0]){
 				case "end":
 					return new End();
@@ -565,6 +724,14 @@ class UtilityCommand{
 					return new Arithmetic(new Cat());
 				case "let":
 					return new Let();
+				case "fun":
+					return new Fun(stringToStackElement(spl[1]), stringToStackElement(spl[2]));
+				case "funEnd":
+					return new FunEnd();
+				case "return":
+					return new Return();
+				case "call":
+					return new Call();
 				case "bind":
 					return new Bind();
 				case "equal":
